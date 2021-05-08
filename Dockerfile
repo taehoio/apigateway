@@ -3,11 +3,11 @@ FROM golang:1.16.3 as build
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
-WORKDIR /api/bin
+WORKDIR /apigateway/bin
 COPY ./bin ./
 
-RUN if [ "$BUILDPLATFORM" = "linux/amd64" ]; then mv api.linux.amd64 api ; fi
-RUN if [ "$BUILDPLATFORM" = "linux/arm64" ]; then mv api.linux.arm64 api ; fi
+RUN if [ "$BUILDPLATFORM" = "linux/amd64" ]; then mv apigateway.linux.amd64 apigateway; fi
+RUN if [ "$BUILDPLATFORM" = "linux/arm64" ]; then mv apigateway.linux.arm64 apigateway; fi
 
 
 FROM --platform=$BUILDPLATFORM gcr.io/distroless/base
@@ -15,5 +15,5 @@ FROM --platform=$BUILDPLATFORM gcr.io/distroless/base
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
-COPY --from=build /api/bin/api /app/api
-ENTRYPOINT ["app/api"]
+COPY --from=build /apigateway/bin/apigateway /app/apigateway
+ENTRYPOINT ["app/apigateway"]
