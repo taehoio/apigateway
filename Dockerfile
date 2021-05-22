@@ -16,4 +16,7 @@ ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
 COPY --from=build /apigateway/bin/apigateway /app/apigateway
+
+EXPOSE 8080
+
 ENTRYPOINT ["app/apigateway"]

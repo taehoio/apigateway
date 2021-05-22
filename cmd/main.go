@@ -21,6 +21,10 @@ func main() {
 
 	e.Use(middleware.Logger())
 
+	e.HEAD("/", func(c echo.Context) error {
+		return c.NoContent(http.StatusOK)
+	})
+
 	e.GET("/", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{"Hello": "World"})
 	})
