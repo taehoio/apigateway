@@ -7,7 +7,6 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
 	"github.com/taehoio/apigateway/config"
 	baemincryptov1 "github.com/taehoio/idl/gen/go/services/baemincrypto/v1"
 	"google.golang.org/grpc"
@@ -19,8 +18,6 @@ func newEcho() *echo.Echo {
 	e := echo.New()
 	e.HideBanner = true
 	e.HidePort = true
-
-	e.Use(middleware.Logger())
 
 	e.HEAD("/", func(c echo.Context) error {
 		return c.NoContent(http.StatusOK)
