@@ -15,6 +15,11 @@ FROM --platform=$BUILDPLATFORM gcr.io/distroless/base
 ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
+ENV ENV=development
+ENV IS_GRPC_INSECURE=true
+ENV CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+ENV BAEMINCRYPTO_GRPC_SERVICE_ENDPOINT=localhost:50051
+
 COPY --from=build /apigateway/bin/apigateway /app/apigateway
 
 EXPOSE 8080
