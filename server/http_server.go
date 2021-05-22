@@ -11,6 +11,7 @@ import (
 	"github.com/taehoio/apigateway/config"
 	baemincryptov1 "github.com/taehoio/idl/gen/go/services/baemincrypto/v1"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -47,14 +48,23 @@ func newGRPCGateway(ctx context.Context, cfg config.Config) (*runtime.ServeMux, 
 			},
 		),
 	)
+
+	secureOpt := grpc.WithInsecure()
+	if !cfg.Setting().IsGRPCInsecure {
+		creds, err := credentials.NewClientTLSFromFile(cfg.Setting().CertFile, "")
+		if err != nil {
+			return nil, err
+		}
+		secureOpt = grpc.WithTransportCredentials(creds)
+	}
 	options := []grpc.DialOption{
-		grpc.WithInsecure(),
+		secureOpt,
 	}
 
 	if err := baemincryptov1.RegisterBaemincryptoServiceHandlerFromEndpoint(
 		ctx,
 		gwmux,
-		cfg.Setting().BaemincryptoServiceEndpoint,
+		cfg.Setting().BaemincryptoGRPCServiceEndpoint,
 		options,
 	); err != nil {
 		return nil, err

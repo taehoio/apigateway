@@ -12,7 +12,9 @@ type Setting struct {
 	Env                       string
 	GracefulShutdownTimeoutMs int
 
-	BaemincryptoServiceEndpoint string
+	IsGRPCInsecure                  bool
+	CertFile                        string
+	BaemincryptoGRPCServiceEndpoint string
 }
 
 func NewSetting() Setting {
@@ -22,7 +24,9 @@ func NewSetting() Setting {
 		Env:                       getEnv("ENV", "development"),
 		GracefulShutdownTimeoutMs: mustAtoi(getEnv("GRACEFUL_SHUTDOWN_TIMEOUT_MS", "10000")),
 
-		BaemincryptoServiceEndpoint: getEnv("BAEMINCRYPTO_SERVICE_ENDPOINT", "localhost:50051"),
+		IsGRPCInsecure:                  mustAtob(getEnv("IS_GRPC_INSECURE", "true")),
+		CertFile:                        getEnv("CERT_FILE", "/etc/ssl/certs/ca-certificates.crt"),
+		BaemincryptoGRPCServiceEndpoint: getEnv("BAEMINCRYPTO_GRPC_SERVICE_ENDPOINT", "localhost:50051"),
 	}
 }
 
@@ -48,4 +52,12 @@ func mustAtoi(s string) int {
 		log.Panic(err)
 	}
 	return i
+}
+
+func mustAtob(s string) bool {
+	b, err := strconv.ParseBool(s)
+	if err != nil {
+		log.Panic(err)
+	}
+	return b
 }

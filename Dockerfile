@@ -16,7 +16,9 @@ ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
 ENV ENV=development
-ENV BAEMINCRYPTO_SERVICE_ENDPOINT=localhost:50051
+ENV IS_GRPC_INSECURE=true
+ENV CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+ENV BAEMINCRYPTO_GRPC_SERVICE_ENDPOINT=localhost:50051
 
 COPY --from=build /apigateway/bin/apigateway /app/apigateway
 
