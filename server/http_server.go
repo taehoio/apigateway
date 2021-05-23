@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"contrib.go.opencensus.io/exporter/stackdriver/propagation"
 	"github.com/gorilla/mux"
@@ -28,9 +29,10 @@ func newEcho() *echo.Echo {
 
 	e.GET("/", func(c echo.Context) error {
 		return c.JSON(http.StatusOK, map[string]string{
-			"service": "apigateway",
-			"version": "v1",
-			"host":    c.Request().Host,
+			"service":   "apigateway",
+			"version":   "v1",
+			"host":      c.Request().Host,
+			"timestamp": time.Now().UTC().String(),
 		})
 	})
 
