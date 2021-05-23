@@ -25,7 +25,6 @@ func main() {
 }
 
 func runServer(cfg config.Config) error {
-
 	if cfg.Setting().ShouldProfile() {
 		if err := setUpProfiler(cfg.Setting().ServiceName()); err != nil {
 			return err
