@@ -17,29 +17,38 @@ func main() {
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 	log := logrus.StandardLogger()
 
-	if cfg.Setting().ShouldProfile {
-		if err := setUpProfiler(cfg.Setting().ServiceName); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	if cfg.Setting().ShouldTrace {
-		if err := setUpTracing(); err != nil {
-			log.Fatal(err)
-		}
-	}
-
 	log.WithField("setting", cfg.Setting()).Info("Starting server...")
+
+	if err := runServer(cfg); err != nil {
+		log.Fatal(err)
+	}
+}
+
+func runServer(cfg config.Config) error {
+
+	if cfg.Setting().ShouldProfile() {
+		if err := setUpProfiler(cfg.Setting().ServiceName()); err != nil {
+			return err
+		}
+	}
+
+	if cfg.Setting().ShouldTrace() {
+		if err := setUpTracing(); err != nil {
+			return err
+		}
+	}
 
 	ctx := context.Background()
 	srv, err := server.NewHTTPServer(ctx, cfg)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	if err := srv.ListenAndServe(); err != nil {
-		log.Fatal(err)
+		return err
 	}
+
+	return nil
 }
 
 func setUpProfiler(serviceName string) error {

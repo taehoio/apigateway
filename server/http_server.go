@@ -56,8 +56,8 @@ func newGRPCGateway(ctx context.Context, cfg config.Config) (*runtime.ServeMux, 
 	)
 
 	secureOpt := grpc.WithInsecure()
-	if cfg.Setting().ShouldUseGRPCClientTLS {
-		creds, err := credentials.NewClientTLSFromFile(cfg.Setting().CACertFile, "")
+	if cfg.Setting().ShouldUseGRPCClientTLS() {
+		creds, err := credentials.NewClientTLSFromFile(cfg.Setting().CACertFile(), "")
 		if err != nil {
 			return nil, err
 		}
@@ -65,7 +65,7 @@ func newGRPCGateway(ctx context.Context, cfg config.Config) (*runtime.ServeMux, 
 	}
 
 	baemincryptov1Conn, err := grpc.Dial(
-		cfg.Setting().BaemincryptoGRPCServiceEndpoint,
+		cfg.Setting().BaemincryptoGRPCServiceEndpoint(),
 		secureOpt,
 		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}),
 	)
@@ -104,7 +104,7 @@ func NewHTTPServer(ctx context.Context, cfg config.Config) (*http.Server, error)
 	}
 
 	srv := &http.Server{
-		Addr:    ":" + cfg.Setting().HTTPServerPort,
+		Addr:    ":" + cfg.Setting().HTTPServerPort(),
 		Handler: httpHandler,
 	}
 
