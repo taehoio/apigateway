@@ -19,8 +19,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	port := cfg.Setting().HTTPServerPort
-	log.WithField("port", port).Info("Starting server...")
+	log.WithField("setting", cfg.Setting()).Info("Starting server...")
 
 	ctx := context.Background()
 	srv, err := server.NewHTTPServer(ctx, cfg)
