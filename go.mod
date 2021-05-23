@@ -3,6 +3,7 @@ module github.com/taehoio/apigateway
 go 1.16
 
 require (
+	cloud.google.com/go v0.82.0 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.4.0
 	github.com/labstack/echo/v4 v4.2.2
