@@ -27,7 +27,11 @@ func newEcho() *echo.Echo {
 	})
 
 	e.GET("/", func(c echo.Context) error {
-		return c.JSON(http.StatusOK, map[string]string{"Hello": "World"})
+		return c.JSON(http.StatusOK, map[string]string{
+			"service": "apigateway",
+			"version": "v1",
+			"host":    c.Request().Host,
+		})
 	})
 
 	return e
