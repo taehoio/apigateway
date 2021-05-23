@@ -4,11 +4,14 @@ import (
 	"context"
 	"net/http"
 
+	"contrib.go.opencensus.io/exporter/stackdriver/propagation"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/labstack/echo/v4"
 	"github.com/taehoio/apigateway/config"
 	baemincryptov1 "github.com/taehoio/idl/gen/go/services/baemincrypto/v1"
+	"go.opencensus.io/plugin/ocgrpc"
+	"go.opencensus.io/plugin/ochttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/protobuf/encoding/protojson"
@@ -31,7 +34,7 @@ func newEcho() *echo.Echo {
 }
 
 func newGRPCGateway(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error) {
-	gwmux := runtime.NewServeMux(
+	gwMux := runtime.NewServeMux(
 		runtime.WithMarshalerOption(
 			runtime.MIMEWildcard,
 			&runtime.JSONPb{
@@ -47,27 +50,31 @@ func newGRPCGateway(ctx context.Context, cfg config.Config) (*runtime.ServeMux, 
 	)
 
 	secureOpt := grpc.WithInsecure()
-	if !cfg.Setting().IsGRPCInsecure {
-		creds, err := credentials.NewClientTLSFromFile(cfg.Setting().CertFile, "")
+	if cfg.Setting().ShouldUseGRPCClientTLS {
+		creds, err := credentials.NewClientTLSFromFile(cfg.Setting().CACertFile, "")
 		if err != nil {
 			return nil, err
 		}
 		secureOpt = grpc.WithTransportCredentials(creds)
 	}
-	options := []grpc.DialOption{
-		secureOpt,
-	}
 
-	if err := baemincryptov1.RegisterBaemincryptoServiceHandlerFromEndpoint(
-		ctx,
-		gwmux,
+	baemincryptov1Conn, err := grpc.Dial(
 		cfg.Setting().BaemincryptoGRPCServiceEndpoint,
-		options,
+		secureOpt,
+		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}),
+	)
+	if err != nil {
+		return nil, err
+	}
+	if err := baemincryptov1.RegisterBaemincryptoServiceHandler(
+		ctx,
+		gwMux,
+		baemincryptov1Conn,
 	); err != nil {
 		return nil, err
 	}
 
-	return gwmux, nil
+	return gwMux, nil
 }
 
 func NewHTTPServer(ctx context.Context, cfg config.Config) (*http.Server, error) {
@@ -85,9 +92,14 @@ func NewHTTPServer(ctx context.Context, cfg config.Config) (*http.Server, error)
 	httpMux := http.NewServeMux()
 	httpMux.Handle("/", r)
 
+	httpHandler := &ochttp.Handler{
+		Propagation: &propagation.HTTPFormat{},
+		Handler:     httpMux,
+	}
+
 	srv := &http.Server{
 		Addr:    ":" + cfg.Setting().HTTPServerPort,
-		Handler: httpMux,
+		Handler: httpHandler,
 	}
 
 	return srv, nil

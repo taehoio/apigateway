@@ -16,8 +16,10 @@ ARG TARGETPLATFORM
 ARG BUILDPLATFORM
 
 ENV ENV=development
-ENV IS_GRPC_INSECURE=true
-ENV CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+ENV SHOULD_PROFILE=false
+ENV SHOULD_TRACE=false
+ENV SHOULD_USE_GRPC_CLIENT_TLS=false
+ENV CA_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
 ENV BAEMINCRYPTO_GRPC_SERVICE_ENDPOINT=localhost:50051
 
 COPY --from=build /apigateway/bin/apigateway /app/apigateway

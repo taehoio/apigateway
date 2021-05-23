@@ -11,9 +11,11 @@ type Setting struct {
 	HTTPServerPort            string
 	Env                       string
 	GracefulShutdownTimeoutMs int
+	ShouldProfile             bool
+	ShouldTrace               bool
 
-	IsGRPCInsecure                  bool
-	CertFile                        string
+	ShouldUseGRPCClientTLS          bool
+	CACertFile                      string
 	BaemincryptoGRPCServiceEndpoint string
 }
 
@@ -23,9 +25,11 @@ func NewSetting() Setting {
 		HTTPServerPort:            getEnv("HTTP_SERVER_PORT", "8080"),
 		Env:                       getEnv("ENV", "development"),
 		GracefulShutdownTimeoutMs: mustAtoi(getEnv("GRACEFUL_SHUTDOWN_TIMEOUT_MS", "10000")),
+		ShouldProfile:             mustAtob(getEnv("SHOULD_PROFILE", "false")),
+		ShouldTrace:               mustAtob(getEnv("SHOULD_TRACE", "false")),
 
-		IsGRPCInsecure:                  mustAtob(getEnv("IS_GRPC_INSECURE", "true")),
-		CertFile:                        getEnv("CERT_FILE", "/etc/ssl/certs/ca-certificates.crt"),
+		ShouldUseGRPCClientTLS:          mustAtob(getEnv("SHOULD_USE_GRPC_CLIENT_TLS", "false")),
+		CACertFile:                      getEnv("CA_CERT_FILE", "/etc/ssl/certs/ca-certificates.crt"),
 		BaemincryptoGRPCServiceEndpoint: getEnv("BAEMINCRYPTO_GRPC_SERVICE_ENDPOINT", "localhost:50051"),
 	}
 }
