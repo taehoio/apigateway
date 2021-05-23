@@ -4,9 +4,11 @@ import (
 	"context"
 
 	"cloud.google.com/go/profiler"
+	"contrib.go.opencensus.io/exporter/stackdriver"
 	"github.com/sirupsen/logrus"
 	"github.com/taehoio/apigateway/config"
 	"github.com/taehoio/apigateway/server"
+	"go.opencensus.io/trace"
 )
 
 func main() {
@@ -15,8 +17,16 @@ func main() {
 	logrus.SetFormatter(&logrus.JSONFormatter{})
 	log := logrus.StandardLogger()
 
-	if err := setUpProfiler(cfg); err != nil {
-		log.Fatal(err)
+	if cfg.Setting().ShouldProfile {
+		if err := setUpProfiler(cfg.Setting().ServiceName); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	if cfg.Setting().ShouldTrace {
+		if err := setUpTracing(); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	log.WithField("setting", cfg.Setting()).Info("Starting server...")
@@ -32,13 +42,9 @@ func main() {
 	}
 }
 
-func setUpProfiler(cfg config.Config) error {
-	if !shouldProfile(cfg) {
-		return nil
-	}
-
+func setUpProfiler(serviceName string) error {
 	pc := profiler.Config{
-		Service: cfg.Setting().ServiceName,
+		Service: serviceName,
 	}
 	if err := profiler.Start(pc); err != nil {
 		return err
@@ -46,16 +52,16 @@ func setUpProfiler(cfg config.Config) error {
 	return nil
 }
 
-func shouldProfile(cfg config.Config) bool {
-	profilingEnvs := []string{"production", "staging"}
-	return in(profilingEnvs, cfg.Setting().Env)
-}
-
-func in(arr []string, s string) bool {
-	for _, sia := range arr {
-		if sia == s {
-			return true
-		}
+func setUpTracing() error {
+	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
+	if err != nil {
+		return err
 	}
-	return false
+
+	trace.RegisterExporter(exporter)
+	trace.ApplyConfig(trace.Config{
+		DefaultSampler: trace.AlwaysSample(),
+	})
+
+	return nil
 }
