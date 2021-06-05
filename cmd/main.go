@@ -13,7 +13,7 @@ import (
 func main() {
 	cfg := config.NewConfig(config.NewSetting())
 
-	log := cfg.Setting().Logger()
+	log := cfg.Logger()
 	log.WithField("setting", cfg.Setting()).Info("Starting server...")
 
 	if err := runServer(cfg); err != nil {
@@ -22,13 +22,13 @@ func main() {
 }
 
 func runServer(cfg config.Config) error {
-	if cfg.Setting().ShouldProfile() {
-		if err := setUpProfiler(cfg.Setting().ServiceName()); err != nil {
+	if cfg.ShouldProfile() {
+		if err := setUpProfiler(cfg.ServiceName()); err != nil {
 			return err
 		}
 	}
 
-	if cfg.Setting().ShouldTrace() {
+	if cfg.ShouldTrace() {
 		if err := setUpTracing(); err != nil {
 			return err
 		}

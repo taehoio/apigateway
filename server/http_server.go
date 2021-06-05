@@ -65,14 +65,14 @@ func newGRPCGateway(ctx context.Context, cfg config.Config) (*runtime.ServeMux, 
 		runtime.WithMetadata(func(ctx context.Context, req *http.Request) metadata.MD {
 			md := metadata.MD{}
 
-			if cfg.Setting().IsInGCP() {
-				idToken, err := getIDToken(cfg.Setting().BaemincryptoGRPCServiceURL())
+			if cfg.IsInGCP() {
+				idToken, err := getIDToken(cfg.BaemincryptoGRPCServiceURL())
 				if err != nil {
 					logrus.StandardLogger().Error(err)
 				}
 				md.Append("Authorization", "Bearer "+idToken)
 			} else {
-				idToken := cfg.Setting().IDToken()
+				idToken := cfg.IDToken()
 				md.Append("Authorization", "Bearer "+idToken)
 			}
 
@@ -81,8 +81,8 @@ func newGRPCGateway(ctx context.Context, cfg config.Config) (*runtime.ServeMux, 
 	)
 
 	secureOpt := grpc.WithInsecure()
-	if cfg.Setting().ShouldUseGRPCClientTLS() {
-		creds, err := credentials.NewClientTLSFromFile(cfg.Setting().CACertFile(), "")
+	if cfg.ShouldUseGRPCClientTLS() {
+		creds, err := credentials.NewClientTLSFromFile(cfg.CACertFile(), "")
 		if err != nil {
 			return nil, err
 		}
@@ -90,7 +90,7 @@ func newGRPCGateway(ctx context.Context, cfg config.Config) (*runtime.ServeMux, 
 	}
 
 	baemincryptov1Conn, err := grpc.Dial(
-		cfg.Setting().BaemincryptoGRPCServiceEndpoint(),
+		cfg.BaemincryptoGRPCServiceEndpoint(),
 		secureOpt,
 		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}),
 	)
@@ -129,7 +129,7 @@ func NewHTTPServer(ctx context.Context, cfg config.Config) (*http.Server, error)
 	}
 
 	srv := &http.Server{
-		Addr:    ":" + cfg.Setting().HTTPServerPort(),
+		Addr:    fmt.Sprintf(":%d", cfg.HTTPServerPort()),
 		Handler: httpHandler,
 	}
 
