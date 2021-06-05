@@ -4,6 +4,8 @@ import (
 	"log"
 	"os"
 	"strconv"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Setting struct {
@@ -16,9 +18,15 @@ type Setting struct {
 	shouldUseGRPCClientTLS          bool
 	caCertFile                      string
 	baemincryptoGRPCServiceEndpoint string
+	baemincryptoGRPCServiceURL      string
+	isInGCP                         bool
+	idToken                         string
+	logger                          *logrus.Logger
 }
 
 func NewSetting() Setting {
+	logrus.SetFormatter(&logrus.JSONFormatter{})
+
 	return Setting{
 		serviceName:                     "apigateway",
 		httpServerPort:                  getEnv("HTTP_SERVER_PORT", "8080"),
@@ -28,7 +36,11 @@ func NewSetting() Setting {
 		shouldTrace:                     mustAtob(getEnv("SHOULD_TRACE", "false")),
 		shouldUseGRPCClientTLS:          mustAtob(getEnv("SHOULD_USE_GRPC_CLIENT_TLS", "false")),
 		caCertFile:                      getEnv("CA_CERT_FILE", "/etc/ssl/certs/ca-certificates.crt"),
-		baemincryptoGRPCServiceEndpoint: getEnv("BAEMINCRYPTO_GRPC_SERVICE_ENDPOINT", "localhost:50051"),
+		baemincryptoGRPCServiceEndpoint: getEnv("BAEMINCRYPTO_GRPC_SERVICE_ENDPOINT", "baemincrypto-5hwa5dthla-an.a.run.app:443"),
+		baemincryptoGRPCServiceURL:      getEnv("BAEMINCRYPTO_GRPC_SERVICE_URL", "https://baemincrypto-5hwa5dthla-an.a.run.app"),
+		isInGCP:                         mustAtob(getEnv("IS_IN_GCP", "false")),
+		idToken:                         getEnv("ID_TOKEN", ""),
+		logger:                          logrus.StandardLogger(),
 	}
 }
 
@@ -66,6 +78,22 @@ func (s Setting) CACertFile() string {
 
 func (s Setting) BaemincryptoGRPCServiceEndpoint() string {
 	return s.baemincryptoGRPCServiceEndpoint
+}
+
+func (s Setting) BaemincryptoGRPCServiceURL() string {
+	return s.baemincryptoGRPCServiceURL
+}
+
+func (s Setting) IsInGCP() bool {
+	return s.isInGCP
+}
+
+func (s Setting) IDToken() string {
+	return s.idToken
+}
+
+func (s Setting) Logger() *logrus.Logger {
+	return s.logger
 }
 
 func MockSetting() Setting {
