@@ -5,7 +5,6 @@ import (
 
 	"cloud.google.com/go/profiler"
 	"contrib.go.opencensus.io/exporter/stackdriver"
-	"github.com/sirupsen/logrus"
 	"github.com/taehoio/apigateway/config"
 	"github.com/taehoio/apigateway/server"
 	"go.opencensus.io/trace"
@@ -14,9 +13,7 @@ import (
 func main() {
 	cfg := config.NewConfig(config.NewSetting())
 
-	logrus.SetFormatter(&logrus.JSONFormatter{})
-	log := logrus.StandardLogger()
-
+	log := cfg.Logger()
 	log.WithField("setting", cfg.Setting()).Info("Starting server...")
 
 	if err := runServer(cfg); err != nil {
@@ -25,13 +22,13 @@ func main() {
 }
 
 func runServer(cfg config.Config) error {
-	if cfg.Setting().ShouldProfile() {
-		if err := setUpProfiler(cfg.Setting().ServiceName()); err != nil {
+	if cfg.ShouldProfile() {
+		if err := setUpProfiler(cfg.ServiceName()); err != nil {
 			return err
 		}
 	}
 
-	if cfg.Setting().ShouldTrace() {
+	if cfg.ShouldTrace() {
 		if err := setUpTracing(); err != nil {
 			return err
 		}

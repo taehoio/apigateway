@@ -4,68 +4,42 @@ import (
 	"log"
 	"os"
 	"strconv"
+
+	"github.com/sirupsen/logrus"
 )
 
 type Setting struct {
 	serviceName                     string
-	httpServerPort                  string
+	httpServerPort                  int
 	env                             string
-	gracefulShutdownTimeoutMs       int
 	shouldProfile                   bool
 	shouldTrace                     bool
 	shouldUseGRPCClientTLS          bool
 	caCertFile                      string
 	baemincryptoGRPCServiceEndpoint string
+	baemincryptoGRPCServiceURL      string
+	isInGCP                         bool
+	idToken                         string
+	logger                          *logrus.Logger
 }
 
 func NewSetting() Setting {
+	logrus.SetFormatter(&logrus.JSONFormatter{})
+
 	return Setting{
 		serviceName:                     "apigateway",
-		httpServerPort:                  getEnv("HTTP_SERVER_PORT", "8080"),
+		httpServerPort:                  mustAtoi(getEnv("HTTP_SERVER_PORT", "8080")),
 		env:                             getEnv("ENV", "development"),
-		gracefulShutdownTimeoutMs:       mustAtoi(getEnv("GRACEFUL_SHUTDOWN_TIMEOUT_MS", "10000")),
 		shouldProfile:                   mustAtob(getEnv("SHOULD_PROFILE", "false")),
 		shouldTrace:                     mustAtob(getEnv("SHOULD_TRACE", "false")),
 		shouldUseGRPCClientTLS:          mustAtob(getEnv("SHOULD_USE_GRPC_CLIENT_TLS", "false")),
 		caCertFile:                      getEnv("CA_CERT_FILE", "/etc/ssl/certs/ca-certificates.crt"),
-		baemincryptoGRPCServiceEndpoint: getEnv("BAEMINCRYPTO_GRPC_SERVICE_ENDPOINT", "localhost:50051"),
+		baemincryptoGRPCServiceEndpoint: getEnv("BAEMINCRYPTO_GRPC_SERVICE_ENDPOINT", "baemincrypto-5hwa5dthla-an.a.run.app:443"),
+		baemincryptoGRPCServiceURL:      getEnv("BAEMINCRYPTO_GRPC_SERVICE_URL", "https://baemincrypto-5hwa5dthla-an.a.run.app"),
+		isInGCP:                         mustAtob(getEnv("IS_IN_GCP", "false")),
+		idToken:                         getEnv("ID_TOKEN", "NOT_USED_IN_GCP"),
+		logger:                          logrus.StandardLogger(),
 	}
-}
-
-func (s Setting) ServiceName() string {
-	return s.serviceName
-}
-
-func (s Setting) HTTPServerPort() string {
-	return s.httpServerPort
-}
-
-func (s Setting) ENV() string {
-	return s.env
-}
-
-func (s Setting) GracefulShutdownTimeoutMs() int {
-	return s.gracefulShutdownTimeoutMs
-}
-
-func (s Setting) ShouldProfile() bool {
-	return s.shouldProfile
-}
-
-func (s Setting) ShouldTrace() bool {
-	return s.shouldTrace
-}
-
-func (s Setting) ShouldUseGRPCClientTLS() bool {
-	return s.shouldUseGRPCClientTLS
-}
-
-func (s Setting) CACertFile() string {
-	return s.caCertFile
-}
-
-func (s Setting) BaemincryptoGRPCServiceEndpoint() string {
-	return s.baemincryptoGRPCServiceEndpoint
 }
 
 func MockSetting() Setting {

@@ -2,19 +2,24 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
+	googlemetadata "cloud.google.com/go/compute/metadata"
 	"contrib.go.opencensus.io/exporter/stackdriver/propagation"
 	"github.com/gorilla/mux"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/labstack/echo/v4"
+	"github.com/sirupsen/logrus"
 	"github.com/taehoio/apigateway/config"
 	baemincryptov1 "github.com/taehoio/idl/gen/go/services/baemincrypto/v1"
 	"go.opencensus.io/plugin/ocgrpc"
 	"go.opencensus.io/plugin/ochttp"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/encoding/protojson"
 )
 
@@ -39,6 +44,11 @@ func newEcho() *echo.Echo {
 	return e
 }
 
+func getIDTokenInGCP(serviceURL string) (string, error) {
+	tokenURL := fmt.Sprintf("/instance/service-accounts/default/identity?audience=%s", serviceURL)
+	return googlemetadata.Get(tokenURL)
+}
+
 func newGRPCGateway(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error) {
 	gwMux := runtime.NewServeMux(
 		runtime.WithMarshalerOption(
@@ -53,11 +63,29 @@ func newGRPCGateway(ctx context.Context, cfg config.Config) (*runtime.ServeMux, 
 				},
 			},
 		),
+		runtime.WithMetadata(func(ctx context.Context, req *http.Request) metadata.MD {
+			md := metadata.MD{}
+
+			if cfg.IsInGCP() {
+				idToken, err := getIDTokenInGCP(strings.Join([]string{
+					cfg.BaemincryptoGRPCServiceURL(),
+				}, ","))
+				if err != nil {
+					logrus.StandardLogger().Error(err)
+				}
+				md.Append("Authorization", "Bearer "+idToken)
+			} else {
+				idToken := cfg.IDToken()
+				md.Append("Authorization", "Bearer "+idToken)
+			}
+
+			return md
+		}),
 	)
 
 	secureOpt := grpc.WithInsecure()
-	if cfg.Setting().ShouldUseGRPCClientTLS() {
-		creds, err := credentials.NewClientTLSFromFile(cfg.Setting().CACertFile(), "")
+	if cfg.ShouldUseGRPCClientTLS() {
+		creds, err := credentials.NewClientTLSFromFile(cfg.CACertFile(), "")
 		if err != nil {
 			return nil, err
 		}
@@ -65,7 +93,7 @@ func newGRPCGateway(ctx context.Context, cfg config.Config) (*runtime.ServeMux, 
 	}
 
 	baemincryptov1Conn, err := grpc.Dial(
-		cfg.Setting().BaemincryptoGRPCServiceEndpoint(),
+		cfg.BaemincryptoGRPCServiceEndpoint(),
 		secureOpt,
 		grpc.WithStatsHandler(&ocgrpc.ClientHandler{}),
 	)
@@ -104,7 +132,7 @@ func NewHTTPServer(ctx context.Context, cfg config.Config) (*http.Server, error)
 	}
 
 	srv := &http.Server{
-		Addr:    ":" + cfg.Setting().HTTPServerPort(),
+		Addr:    fmt.Sprintf(":%d", cfg.HTTPServerPort()),
 		Handler: httpHandler,
 	}
 
