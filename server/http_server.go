@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	googlemetadata "cloud.google.com/go/compute/metadata"
@@ -43,7 +44,7 @@ func newEcho() *echo.Echo {
 	return e
 }
 
-func getIDToken(serviceURL string) (string, error) {
+func getIDTokenInGCP(serviceURL string) (string, error) {
 	tokenURL := fmt.Sprintf("/instance/service-accounts/default/identity?audience=%s", serviceURL)
 	return googlemetadata.Get(tokenURL)
 }
@@ -66,7 +67,9 @@ func newGRPCGateway(ctx context.Context, cfg config.Config) (*runtime.ServeMux, 
 			md := metadata.MD{}
 
 			if cfg.IsInGCP() {
-				idToken, err := getIDToken(cfg.BaemincryptoGRPCServiceURL())
+				idToken, err := getIDTokenInGCP(strings.Join([]string{
+					cfg.BaemincryptoGRPCServiceURL(),
+				}, ","))
 				if err != nil {
 					logrus.StandardLogger().Error(err)
 				}
