@@ -5,9 +5,10 @@ import (
 
 	"cloud.google.com/go/profiler"
 	"contrib.go.opencensus.io/exporter/stackdriver"
+	"go.opencensus.io/trace"
+
 	"github.com/taehoio/apigateway/config"
 	"github.com/taehoio/apigateway/server"
-	"go.opencensus.io/trace"
 )
 
 func main() {

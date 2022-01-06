@@ -7,8 +7,9 @@ import (
 
 	"contrib.go.opencensus.io/exporter/stackdriver/propagation"
 	"github.com/gorilla/mux"
-	"github.com/taehoio/apigateway/config"
 	"go.opencensus.io/plugin/ochttp"
+
+	"github.com/taehoio/apigateway/config"
 )
 
 func newRouter(ctx context.Context, cfg config.Config) (*mux.Router, error) {
