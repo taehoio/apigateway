@@ -9,13 +9,15 @@ import (
 	googlemetadata "cloud.google.com/go/compute/metadata"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/sirupsen/logrus"
-	"github.com/taehoio/apigateway/config"
-	baemincryptov1 "github.com/taehoio/idl/gen/go/services/baemincrypto/v1"
 	"go.opencensus.io/plugin/ocgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/encoding/protojson"
+
+	"github.com/taehoio/apigateway/config"
+	baemincryptov1 "github.com/taehoio/idl/gen/go/services/baemincrypto/v1"
 )
 
 func getIDTokenInGCP(serviceURL string) (string, error) {
@@ -60,7 +62,7 @@ func withMetadata(cfg config.Config) runtime.ServeMuxOption {
 }
 
 func withSecureOption(cfg config.Config) (grpc.DialOption, error) {
-	secureOpt := grpc.WithInsecure()
+	secureOpt := grpc.WithTransportCredentials(insecure.NewCredentials())
 
 	if cfg.ShouldUseGRPCClientTLS() {
 		creds, err := credentials.NewClientTLSFromFile(cfg.CACertFile(), "")
