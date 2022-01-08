@@ -22,13 +22,13 @@ func newRouter(ctx context.Context, cfg config.Config) (*mux.Router, error) {
 	if err != nil {
 		return nil, err
 	}
-	rtr.Handle("/{baemincrypto}/{version}/{rest:.*}", baemincryptoGatewayMux)
+	rtr.Handle("/baemincrypto/{version}/{rest:.*}", baemincryptoGatewayMux)
 
 	userGatewayMux, err := newUserServiceGRPCGatewayMux(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
-	rtr.Handle("/{user}/{version}/{rest:.*}", userGatewayMux)
+	rtr.Handle("/user/{version}/{rest:.*}", userGatewayMux)
 
 	return rtr, nil
 }
