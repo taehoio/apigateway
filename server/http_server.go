@@ -18,17 +18,11 @@ func newRouter(ctx context.Context, cfg config.Config) (*mux.Router, error) {
 	ec := newEcho()
 	rtr.HandleFunc("/", ec.ServeHTTP)
 
-	baemincryptoGatewayMux, err := newBaemincryptoServiceGRPCGatewayMux(ctx, cfg)
+	gwMux, err := grpcGWMux(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}
-	rtr.Handle("/baemincrypto/{version}/{rest:.*}", baemincryptoGatewayMux)
-
-	userGatewayMux, err := newUserServiceGRPCGatewayMux(ctx, cfg)
-	if err != nil {
-		return nil, err
-	}
-	rtr.Handle("/user/{version}/{rest:.*}", userGatewayMux)
+	rtr.Handle("/{serviceName}/{version}/{rest:.*}", gwMux)
 
 	return rtr, nil
 }
