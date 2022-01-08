@@ -18,7 +18,7 @@ func newRouter(ctx context.Context, cfg config.Config) (*mux.Router, error) {
 	ec := newEcho()
 	rtr.HandleFunc("/", ec.ServeHTTP)
 
-	gwMux, err := newGRPCGatewayMux(ctx, cfg)
+	gwMux, err := grpcGWMux(ctx, cfg)
 	if err != nil {
 		return nil, err
 	}

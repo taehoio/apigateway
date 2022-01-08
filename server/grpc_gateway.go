@@ -18,6 +18,7 @@ import (
 
 	"github.com/taehoio/apigateway/config"
 	baemincryptov1 "github.com/taehoio/idl/gen/go/services/baemincrypto/v1"
+	userv1 "github.com/taehoio/idl/gen/go/services/user/v1"
 )
 
 func getIDTokenInGCP(serviceURL string) (string, error) {
@@ -40,14 +41,15 @@ func withMarshalerOption() runtime.ServeMuxOption {
 	)
 }
 
-func withMetadata(cfg config.Config) runtime.ServeMuxOption {
+func withMetadata(cfg config.Config, serviceNameURLMap map[string]string) runtime.ServeMuxOption {
 	return runtime.WithMetadata(func(ctx context.Context, req *http.Request) metadata.MD {
+		serviceName := strings.Split(req.URL.Path, "/")[1]
+		serviceURL := serviceNameURLMap[serviceName]
+
 		md := metadata.MD{}
 
 		if cfg.IsInGCP() {
-			idToken, err := getIDTokenInGCP(strings.Join([]string{
-				cfg.BaemincryptoGRPCServiceURL(),
-			}, ","))
+			idToken, err := getIDTokenInGCP(serviceURL)
 			if err != nil {
 				logrus.StandardLogger().Error(err)
 			}
@@ -100,10 +102,35 @@ func registerBaemincryptoService(ctx context.Context, gwMux *runtime.ServeMux, e
 	return nil
 }
 
-func newGRPCGatewayMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error) {
+func registerUserService(ctx context.Context, gwMux *runtime.ServeMux, endpoint string, opts ...grpc.DialOption) error {
+	userv1Conn, err := grpc.Dial(
+		endpoint,
+		opts...,
+	)
+	if err != nil {
+		return err
+	}
+
+	if err := userv1.RegisterUserServiceHandler(
+		ctx,
+		gwMux,
+		userv1Conn,
+	); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func grpcGWMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error) {
+	serviceNameURLMap := map[string]string{
+		"baemincrypto": cfg.BaemincryptoGRPCServiceURL(),
+		"user":         cfg.UserGRPCServiceURL(),
+	}
+
 	gwMux := runtime.NewServeMux(
 		withMarshalerOption(),
-		withMetadata(cfg),
+		withMetadata(cfg, serviceNameURLMap),
 	)
 
 	secureOpt, err := withSecureOption(cfg)
@@ -115,6 +142,16 @@ func newGRPCGatewayMux(ctx context.Context, cfg config.Config) (*runtime.ServeMu
 		ctx,
 		gwMux,
 		cfg.BaemincryptoGRPCServiceEndpoint(),
+		secureOpt,
+		withTracingStatsHandler(),
+	); err != nil {
+		return nil, err
+	}
+
+	if err := registerUserService(
+		ctx,
+		gwMux,
+		cfg.UserGRPCServiceEndpoint(),
 		secureOpt,
 		withTracingStatsHandler(),
 	); err != nil {
