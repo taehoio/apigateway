@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"strings"
 
 	googlemetadata "cloud.google.com/go/compute/metadata"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
@@ -41,14 +40,12 @@ func withMarshalerOption() runtime.ServeMuxOption {
 	)
 }
 
-func withMetadata(cfg config.Config) runtime.ServeMuxOption {
+func withMetadata(cfg config.Config, serviceURL string) runtime.ServeMuxOption {
 	return runtime.WithMetadata(func(ctx context.Context, req *http.Request) metadata.MD {
 		md := metadata.MD{}
 
 		if cfg.IsInGCP() {
-			idToken, err := getIDTokenInGCP(strings.Join([]string{
-				cfg.UserGRPCServiceURL(),
-			}, ","))
+			idToken, err := getIDTokenInGCP(serviceURL)
 			if err != nil {
 				logrus.StandardLogger().Error(err)
 			}
@@ -101,6 +98,30 @@ func registerBaemincryptoService(ctx context.Context, gwMux *runtime.ServeMux, e
 	return nil
 }
 
+func newBaemincryptoServiceGRPCGatewayMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error) {
+	gwMux := runtime.NewServeMux(
+		withMarshalerOption(),
+		withMetadata(cfg, cfg.BaemincryptoGRPCServiceURL()),
+	)
+
+	secureOpt, err := withSecureOption(cfg)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := registerBaemincryptoService(
+		ctx,
+		gwMux,
+		cfg.BaemincryptoGRPCServiceEndpoint(),
+		secureOpt,
+		withTracingStatsHandler(),
+	); err != nil {
+		return nil, err
+	}
+
+	return gwMux, nil
+}
+
 func registerUserService(ctx context.Context, gwMux *runtime.ServeMux, endpoint string, opts ...grpc.DialOption) error {
 	userv1Conn, err := grpc.Dial(
 		endpoint,
@@ -121,24 +142,14 @@ func registerUserService(ctx context.Context, gwMux *runtime.ServeMux, endpoint 
 	return nil
 }
 
-func newGRPCGatewayMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error) {
+func newUserServiceGRPCGatewayMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error) {
 	gwMux := runtime.NewServeMux(
 		withMarshalerOption(),
-		withMetadata(cfg),
+		withMetadata(cfg, cfg.UserGRPCServiceURL()),
 	)
 
 	secureOpt, err := withSecureOption(cfg)
 	if err != nil {
-		return nil, err
-	}
-
-	if err := registerBaemincryptoService(
-		ctx,
-		gwMux,
-		cfg.BaemincryptoGRPCServiceEndpoint(),
-		secureOpt,
-		withTracingStatsHandler(),
-	); err != nil {
 		return nil, err
 	}
 
