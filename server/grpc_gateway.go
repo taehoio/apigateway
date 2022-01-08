@@ -17,8 +17,8 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/taehoio/apigateway/config"
-	baemincryptov1 "github.com/taehoio/idl/gen/go/services/baemincrypto/v1"
-	userv1 "github.com/taehoio/idl/gen/go/services/user/v1"
+	baemincryptov1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/baemincrypto/v1"
+	userv1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/user/v1"
 )
 
 func getIDTokenInGCP(serviceURL string) (string, error) {
