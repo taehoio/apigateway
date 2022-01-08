@@ -47,7 +47,6 @@ func withMetadata(cfg config.Config) runtime.ServeMuxOption {
 
 		if cfg.IsInGCP() {
 			idToken, err := getIDTokenInGCP(strings.Join([]string{
-				cfg.BaemincryptoGRPCServiceURL(),
 				cfg.UserGRPCServiceURL(),
 			}, ","))
 			if err != nil {
