@@ -14,6 +14,8 @@ type Config interface {
 	CACertFile() string
 	BaemincryptoGRPCServiceEndpoint() string
 	BaemincryptoGRPCServiceURL() string
+	UserGRPCServiceEndpoint() string
+	UserGRPCServiceURL() string
 	IsInGCP() bool
 	IDToken() string
 	Logger() *logrus.Logger
@@ -73,6 +75,14 @@ func (c DefaultConfig) BaemincryptoGRPCServiceEndpoint() string {
 
 func (c DefaultConfig) BaemincryptoGRPCServiceURL() string {
 	return c.Setting().baemincryptoGRPCServiceURL
+}
+
+func (c DefaultConfig) UserGRPCServiceEndpoint() string {
+	return c.Setting().userGRPCServiceEndpoint
+}
+
+func (c DefaultConfig) UserGRPCServiceURL() string {
+	return c.Setting().userGRPCServiceURL
 }
 
 func (c DefaultConfig) IsInGCP() bool {

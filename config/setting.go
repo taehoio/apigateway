@@ -18,6 +18,8 @@ type Setting struct {
 	caCertFile                      string
 	baemincryptoGRPCServiceEndpoint string
 	baemincryptoGRPCServiceURL      string
+	userGRPCServiceEndpoint         string
+	userGRPCServiceURL              string
 	isInGCP                         bool
 	idToken                         string
 	logger                          *logrus.Logger
@@ -36,6 +38,8 @@ func NewSetting() Setting {
 		caCertFile:                      getEnv("CA_CERT_FILE", "/etc/ssl/certs/ca-certificates.crt"),
 		baemincryptoGRPCServiceEndpoint: getEnv("BAEMINCRYPTO_GRPC_SERVICE_ENDPOINT", "baemincrypto-5hwa5dthla-an.a.run.app:443"),
 		baemincryptoGRPCServiceURL:      getEnv("BAEMINCRYPTO_GRPC_SERVICE_URL", "https://baemincrypto-5hwa5dthla-an.a.run.app"),
+		userGRPCServiceEndpoint:         getEnv("USER_GRPC_SERVICE_ENDPOINT", "user-5hwa5dthla-an.a.run.app:443"),
+		userGRPCServiceURL:              getEnv("USER_GRPC_SERVICE_URL", "https://user-5hwa5dthla-an.a.run.app"),
 		isInGCP:                         mustAtob(getEnv("IS_IN_GCP", "false")),
 		idToken:                         getEnv("ID_TOKEN", "NOT_USED_IN_GCP"),
 		logger:                          logrus.StandardLogger(),

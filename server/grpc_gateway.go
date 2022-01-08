@@ -18,6 +18,7 @@ import (
 
 	"github.com/taehoio/apigateway/config"
 	baemincryptov1 "github.com/taehoio/idl/gen/go/services/baemincrypto/v1"
+	userv1 "github.com/taehoio/idl/gen/go/services/user/v1"
 )
 
 func getIDTokenInGCP(serviceURL string) (string, error) {
@@ -47,6 +48,7 @@ func withMetadata(cfg config.Config) runtime.ServeMuxOption {
 		if cfg.IsInGCP() {
 			idToken, err := getIDTokenInGCP(strings.Join([]string{
 				cfg.BaemincryptoGRPCServiceURL(),
+				cfg.UserGRPCServiceURL(),
 			}, ","))
 			if err != nil {
 				logrus.StandardLogger().Error(err)
@@ -100,6 +102,26 @@ func registerBaemincryptoService(ctx context.Context, gwMux *runtime.ServeMux, e
 	return nil
 }
 
+func registerUserService(ctx context.Context, gwMux *runtime.ServeMux, endpoint string, opts ...grpc.DialOption) error {
+	userv1Conn, err := grpc.Dial(
+		endpoint,
+		opts...,
+	)
+	if err != nil {
+		return err
+	}
+
+	if err := userv1.RegisterUserServiceHandler(
+		ctx,
+		gwMux,
+		userv1Conn,
+	); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func newGRPCGatewayMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error) {
 	gwMux := runtime.NewServeMux(
 		withMarshalerOption(),
@@ -115,6 +137,16 @@ func newGRPCGatewayMux(ctx context.Context, cfg config.Config) (*runtime.ServeMu
 		ctx,
 		gwMux,
 		cfg.BaemincryptoGRPCServiceEndpoint(),
+		secureOpt,
+		withTracingStatsHandler(),
+	); err != nil {
+		return nil, err
+	}
+
+	if err := registerUserService(
+		ctx,
+		gwMux,
+		cfg.UserGRPCServiceEndpoint(),
 		secureOpt,
 		withTracingStatsHandler(),
 	); err != nil {
