@@ -49,14 +49,14 @@ func withMetadata(cfg config.Config, serviceNameURLMap map[string]string) runtim
 
 		md := metadata.MD{}
 
-		if cfg.IsInGCP() {
+		if cfg.Setting().IsInGCP {
 			idToken, err := getIDTokenInGCP(serviceURL)
 			if err != nil {
 				logrus.StandardLogger().Error(err)
 			}
 			md.Append("Authorization", "Bearer "+idToken)
 		} else {
-			idToken := cfg.IDToken()
+			idToken := cfg.Setting().IDToken
 			md.Append("Authorization", "Bearer "+idToken)
 		}
 
@@ -67,8 +67,8 @@ func withMetadata(cfg config.Config, serviceNameURLMap map[string]string) runtim
 func withSecureOption(cfg config.Config) (grpc.DialOption, error) {
 	secureOpt := grpc.WithTransportCredentials(insecure.NewCredentials())
 
-	if cfg.ShouldUseGRPCClientTLS() {
-		creds, err := credentials.NewClientTLSFromFile(cfg.CACertFile(), "")
+	if cfg.Setting().ShouldUseGRPCClientTLS {
+		creds, err := credentials.NewClientTLSFromFile(cfg.Setting().CACertFile, "")
 		if err != nil {
 			return nil, err
 		}
@@ -145,9 +145,9 @@ func registerAuthService(ctx context.Context, gwMux *runtime.ServeMux, endpoint 
 
 func grpcGWMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error) {
 	serviceNameURLMap := map[string]string{
-		"baemincrypto": cfg.BaemincryptoGRPCServiceURL(),
-		"user":         cfg.UserGRPCServiceURL(),
-		"auth":         cfg.AuthGRPCServiceURL(),
+		"baemincrypto": cfg.Setting().BaemincryptoGRPCServiceURL,
+		"user":         cfg.Setting().UserGRPCServiceURL,
+		"auth":         cfg.Setting().AuthGRPCServiceURL,
 	}
 
 	gwMux := runtime.NewServeMux(
@@ -163,7 +163,7 @@ func grpcGWMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error
 	if err := registerBaemincryptoService(
 		ctx,
 		gwMux,
-		cfg.BaemincryptoGRPCServiceEndpoint(),
+		cfg.Setting().BaemincryptoGRPCServiceEndpoint,
 		secureOpt,
 		withTracingStatsHandler(),
 	); err != nil {
@@ -173,7 +173,7 @@ func grpcGWMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error
 	if err := registerUserService(
 		ctx,
 		gwMux,
-		cfg.UserGRPCServiceEndpoint(),
+		cfg.Setting().UserGRPCServiceEndpoint,
 		secureOpt,
 		withTracingStatsHandler(),
 	); err != nil {
@@ -183,7 +183,7 @@ func grpcGWMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error
 	if err := registerAuthService(
 		ctx,
 		gwMux,
-		cfg.AuthGRPCServiceEndpoint(),
+		cfg.Setting().AuthGRPCServiceEndpoint,
 		secureOpt,
 		withTracingStatsHandler(),
 	); err != nil {

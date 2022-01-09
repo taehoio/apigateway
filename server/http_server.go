@@ -46,7 +46,7 @@ func NewHTTPServer(ctx context.Context, cfg config.Config) (*http.Server, error)
 	httpHandler := handlerWithTracingPropagation(httpMux)
 
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%d", cfg.HTTPServerPort()),
+		Addr:    fmt.Sprintf(":%d", cfg.Setting().HTTPServerPort),
 		Handler: httpHandler,
 	}
 

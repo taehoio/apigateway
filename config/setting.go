@@ -7,42 +7,42 @@ import (
 )
 
 type Setting struct {
-	serviceName                     string
-	httpServerPort                  int
-	env                             string
-	gracefulShutdownTimeoutMs       int
-	shouldProfile                   bool
-	shouldTrace                     bool
-	shouldUseGRPCClientTLS          bool
-	caCertFile                      string
-	baemincryptoGRPCServiceEndpoint string
-	baemincryptoGRPCServiceURL      string
-	userGRPCServiceEndpoint         string
-	userGRPCServiceURL              string
-	authGRPCServiceEndpoint         string
-	authGRPCServiceURL              string
-	isInGCP                         bool
-	idToken                         string
+	ServiceName                     string
+	HTTPServerPort                  int
+	Env                             string
+	GracefulShutdownTimeoutMs       int
+	ShouldProfile                   bool
+	ShouldTrace                     bool
+	ShouldUseGRPCClientTLS          bool
+	CACertFile                      string
+	BaemincryptoGRPCServiceEndpoint string
+	BaemincryptoGRPCServiceURL      string
+	UserGRPCServiceEndpoint         string
+	UserGRPCServiceURL              string
+	AuthGRPCServiceEndpoint         string
+	AuthGRPCServiceURL              string
+	IsInGCP                         bool
+	IDToken                         string
 }
 
 func NewSetting() Setting {
 	return Setting{
-		serviceName:                     "apigateway",
-		httpServerPort:                  mustAtoi(getEnv("HTTP_SERVER_PORT", "8080")),
-		env:                             getEnv("ENV", "development"),
-		gracefulShutdownTimeoutMs:       mustAtoi(getEnv("GRACEFUL_SHUTDOWN_TIMEOUT_MS", "5000")),
-		shouldProfile:                   mustAtob(getEnv("SHOULD_PROFILE", "false")),
-		shouldTrace:                     mustAtob(getEnv("SHOULD_TRACE", "false")),
-		shouldUseGRPCClientTLS:          mustAtob(getEnv("SHOULD_USE_GRPC_CLIENT_TLS", "false")),
-		caCertFile:                      getEnv("CA_CERT_FILE", "/etc/ssl/certs/ca-certificates.crt"),
-		baemincryptoGRPCServiceEndpoint: getEnv("BAEMINCRYPTO_GRPC_SERVICE_ENDPOINT", "baemincrypto-5hwa5dthla-an.a.run.app:443"),
-		baemincryptoGRPCServiceURL:      getEnv("BAEMINCRYPTO_GRPC_SERVICE_URL", "https://baemincrypto-5hwa5dthla-an.a.run.app"),
-		userGRPCServiceEndpoint:         getEnv("USER_GRPC_SERVICE_ENDPOINT", "user-5hwa5dthla-an.a.run.app:443"),
-		userGRPCServiceURL:              getEnv("USER_GRPC_SERVICE_URL", "https://user-5hwa5dthla-an.a.run.app"),
-		authGRPCServiceEndpoint:         getEnv("AUTH_GRPC_SERVICE_ENDPOINT", "auth-5hwa5dthla-an.a.run.app:443"),
-		authGRPCServiceURL:              getEnv("AUTH_GRPC_SERVICE_URL", "https://auth-5hwa5dthla-an.a.run.app"),
-		isInGCP:                         mustAtob(getEnv("IS_IN_GCP", "false")),
-		idToken:                         getEnv("ID_TOKEN", "NOT_USED_IN_GCP"),
+		ServiceName:                     "apigateway",
+		HTTPServerPort:                  mustAtoi(getEnv("HTTP_SERVER_PORT", "8080")),
+		Env:                             getEnv("ENV", "development"),
+		GracefulShutdownTimeoutMs:       mustAtoi(getEnv("GRACEFUL_SHUTDOWN_TIMEOUT_MS", "5000")),
+		ShouldProfile:                   mustAtob(getEnv("SHOULD_PROFILE", "false")),
+		ShouldTrace:                     mustAtob(getEnv("SHOULD_TRACE", "false")),
+		ShouldUseGRPCClientTLS:          mustAtob(getEnv("SHOULD_USE_GRPC_CLIENT_TLS", "false")),
+		CACertFile:                      getEnv("CA_CERT_FILE", "/etc/ssl/certs/ca-certificates.crt"),
+		BaemincryptoGRPCServiceEndpoint: getEnv("BAEMINCRYPTO_GRPC_SERVICE_ENDPOINT", "baemincrypto-5hwa5dthla-an.a.run.app:443"),
+		BaemincryptoGRPCServiceURL:      getEnv("BAEMINCRYPTO_GRPC_SERVICE_URL", "https://baemincrypto-5hwa5dthla-an.a.run.app"),
+		UserGRPCServiceEndpoint:         getEnv("USER_GRPC_SERVICE_ENDPOINT", "user-5hwa5dthla-an.a.run.app:443"),
+		UserGRPCServiceURL:              getEnv("USER_GRPC_SERVICE_URL", "https://user-5hwa5dthla-an.a.run.app"),
+		AuthGRPCServiceEndpoint:         getEnv("AUTH_GRPC_SERVICE_ENDPOINT", "auth-5hwa5dthla-an.a.run.app:443"),
+		AuthGRPCServiceURL:              getEnv("AUTH_GRPC_SERVICE_URL", "https://auth-5hwa5dthla-an.a.run.app"),
+		IsInGCP:                         mustAtob(getEnv("IS_IN_GCP", "false")),
+		IDToken:                         getEnv("ID_TOKEN", "NOT_USED_IN_GCP"),
 	}
 }
 
