@@ -19,6 +19,8 @@ type Setting struct {
 	baemincryptoGRPCServiceURL      string
 	userGRPCServiceEndpoint         string
 	userGRPCServiceURL              string
+	authGRPCServiceEndpoint         string
+	authGRPCServiceURL              string
 	isInGCP                         bool
 	idToken                         string
 }
@@ -37,6 +39,8 @@ func NewSetting() Setting {
 		baemincryptoGRPCServiceURL:      getEnv("BAEMINCRYPTO_GRPC_SERVICE_URL", "https://baemincrypto-5hwa5dthla-an.a.run.app"),
 		userGRPCServiceEndpoint:         getEnv("USER_GRPC_SERVICE_ENDPOINT", "user-5hwa5dthla-an.a.run.app:443"),
 		userGRPCServiceURL:              getEnv("USER_GRPC_SERVICE_URL", "https://user-5hwa5dthla-an.a.run.app"),
+		authGRPCServiceEndpoint:         getEnv("AUTH_GRPC_SERVICE_ENDPOINT", "auth-5hwa5dthla-an.a.run.app:443"),
+		authGRPCServiceURL:              getEnv("AUTH_GRPC_SERVICE_URL", "https://auth-5hwa5dthla-an.a.run.app"),
 		isInGCP:                         mustAtob(getEnv("IS_IN_GCP", "false")),
 		idToken:                         getEnv("ID_TOKEN", "NOT_USED_IN_GCP"),
 	}

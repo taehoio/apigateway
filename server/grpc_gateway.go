@@ -17,6 +17,7 @@ import (
 	"google.golang.org/protobuf/encoding/protojson"
 
 	"github.com/taehoio/apigateway/config"
+	authv1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/auth/v1"
 	baemincryptov1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/baemincrypto/v1"
 	userv1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/user/v1"
 )
@@ -122,10 +123,31 @@ func registerUserService(ctx context.Context, gwMux *runtime.ServeMux, endpoint 
 	return nil
 }
 
+func registerAuthService(ctx context.Context, gwMux *runtime.ServeMux, endpoint string, opts ...grpc.DialOption) error {
+	authv1Conn, err := grpc.Dial(
+		endpoint,
+		opts...,
+	)
+	if err != nil {
+		return err
+	}
+
+	if err := authv1.RegisterAuthServiceHandler(
+		ctx,
+		gwMux,
+		authv1Conn,
+	); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func grpcGWMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error) {
 	serviceNameURLMap := map[string]string{
 		"baemincrypto": cfg.BaemincryptoGRPCServiceURL(),
 		"user":         cfg.UserGRPCServiceURL(),
+		"auth":         cfg.AuthGRPCServiceURL(),
 	}
 
 	gwMux := runtime.NewServeMux(
@@ -152,6 +174,16 @@ func grpcGWMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error
 		ctx,
 		gwMux,
 		cfg.UserGRPCServiceEndpoint(),
+		secureOpt,
+		withTracingStatsHandler(),
+	); err != nil {
+		return nil, err
+	}
+
+	if err := registerAuthService(
+		ctx,
+		gwMux,
+		cfg.AuthGRPCServiceEndpoint(),
 		secureOpt,
 		withTracingStatsHandler(),
 	); err != nil {
