@@ -19,6 +19,8 @@ type Config interface {
 	BaemincryptoGRPCServiceURL() string
 	UserGRPCServiceEndpoint() string
 	UserGRPCServiceURL() string
+	AuthGRPCServiceEndpoint() string
+	AuthGRPCServiceURL() string
 	IsInGCP() bool
 	IDToken() string
 	Logger() *logrus.Logger
@@ -97,6 +99,14 @@ func (c DefaultConfig) UserGRPCServiceEndpoint() string {
 
 func (c DefaultConfig) UserGRPCServiceURL() string {
 	return c.Setting().userGRPCServiceURL
+}
+
+func (c DefaultConfig) AuthGRPCServiceEndpoint() string {
+	return c.Setting().authGRPCServiceEndpoint
+}
+
+func (c DefaultConfig) AuthGRPCServiceURL() string {
+	return c.Setting().authGRPCServiceURL
 }
 
 func (c DefaultConfig) IsInGCP() bool {
