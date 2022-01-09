@@ -23,11 +23,8 @@ func main() {
 	setting := config.NewSetting()
 	cfg := config.NewConfig(setting, logger)
 
-	log := cfg.Logger()
-	log.WithField("setting", cfg.Setting()).Info("Starting server...")
-
 	if err := runServer(cfg); err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 }
 
