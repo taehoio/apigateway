@@ -9,7 +9,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.2
 	github.com/labstack/echo/v4 v4.6.1
 	github.com/sirupsen/logrus v1.8.1
-	github.com/taehoio/idl v0.0.0-20220108174352-00f0ef6f3ba6
+	github.com/taehoio/idl v0.0.0-20220109060131-1656355049b3
 	go.opencensus.io v0.23.0
 	google.golang.org/grpc v1.43.0
 	google.golang.org/protobuf v1.27.1
