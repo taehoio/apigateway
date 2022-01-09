@@ -2,9 +2,14 @@ package main
 
 import (
 	"context"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"cloud.google.com/go/profiler"
 	"contrib.go.opencensus.io/exporter/stackdriver"
+	"github.com/sirupsen/logrus"
 	"go.opencensus.io/trace"
 
 	"github.com/taehoio/apigateway/config"
@@ -12,17 +17,20 @@ import (
 )
 
 func main() {
-	cfg := config.NewConfig(config.NewSetting())
+	logrus.SetFormatter(&logrus.JSONFormatter{})
+	logger := logrus.StandardLogger()
 
-	log := cfg.Logger()
-	log.WithField("setting", cfg.Setting()).Info("Starting server...")
+	setting := config.NewSetting()
+	cfg := config.NewConfig(setting, logger)
 
 	if err := runServer(cfg); err != nil {
-		log.Fatal(err)
+		logger.Fatal(err)
 	}
 }
 
 func runServer(cfg config.Config) error {
+	log := cfg.Logger()
+
 	if cfg.ShouldProfile() {
 		if err := setUpProfiler(cfg.ServiceName()); err != nil {
 			return err
@@ -36,12 +44,28 @@ func runServer(cfg config.Config) error {
 	}
 
 	ctx := context.Background()
-	srv, err := server.NewHTTPServer(ctx, cfg)
+	httpServer, err := server.NewHTTPServer(ctx, cfg)
 	if err != nil {
 		return err
 	}
 
-	if err := srv.ListenAndServe(); err != nil {
+	go func() {
+		log.WithField("port", cfg.HTTPServerPort()).Info("starting apigateway HTTP server")
+		if err := httpServer.ListenAndServe(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	defer signal.Stop(quit)
+
+	<-quit
+
+	time.Sleep(time.Duration(cfg.GracefulShutdownTimeoutMs()) * time.Millisecond)
+
+	log.Info("Stopping apigateway HTTP server")
+	if err := httpServer.Shutdown(ctx); err != nil {
 		return err
 	}
 

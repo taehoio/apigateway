@@ -1,6 +1,8 @@
 package config
 
-import "github.com/sirupsen/logrus"
+import (
+	"github.com/sirupsen/logrus"
+)
 
 type Config interface {
 	Setting() Setting
@@ -8,6 +10,7 @@ type Config interface {
 	ServiceName() string
 	HTTPServerPort() int
 	ENV() string
+	GracefulShutdownTimeoutMs() int
 	ShouldProfile() bool
 	ShouldTrace() bool
 	ShouldUseGRPCClientTLS() bool
@@ -25,11 +28,13 @@ type DefaultConfig struct {
 	Config
 
 	setting Setting
+	logger  *logrus.Logger
 }
 
-func NewConfig(setting Setting) Config {
+func NewConfig(setting Setting, logger *logrus.Logger) Config {
 	return &DefaultConfig{
 		setting: setting,
+		logger:  logger,
 	}
 }
 
@@ -37,8 +42,13 @@ func (c DefaultConfig) Setting() Setting {
 	return c.setting
 }
 
+func MockLogger() *logrus.Logger {
+	logrus.SetFormatter(&logrus.JSONFormatter{})
+	return logrus.StandardLogger()
+}
+
 func MockConfig() Config {
-	return NewConfig(MockSetting())
+	return NewConfig(MockSetting(), MockLogger())
 }
 
 func (c DefaultConfig) ServiceName() string {
@@ -51,6 +61,10 @@ func (c DefaultConfig) HTTPServerPort() int {
 
 func (c DefaultConfig) ENV() string {
 	return c.Setting().env
+}
+
+func (c DefaultConfig) GracefulShutdownTimeoutMs() int {
+	return c.Setting().gracefulShutdownTimeoutMs
 }
 
 func (c DefaultConfig) ShouldProfile() bool {
@@ -94,5 +108,5 @@ func (c DefaultConfig) IDToken() string {
 }
 
 func (c DefaultConfig) Logger() *logrus.Logger {
-	return c.Setting().logger
+	return c.logger
 }

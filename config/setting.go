@@ -4,14 +4,13 @@ import (
 	"log"
 	"os"
 	"strconv"
-
-	"github.com/sirupsen/logrus"
 )
 
 type Setting struct {
 	serviceName                     string
 	httpServerPort                  int
 	env                             string
+	gracefulShutdownTimeoutMs       int
 	shouldProfile                   bool
 	shouldTrace                     bool
 	shouldUseGRPCClientTLS          bool
@@ -22,16 +21,14 @@ type Setting struct {
 	userGRPCServiceURL              string
 	isInGCP                         bool
 	idToken                         string
-	logger                          *logrus.Logger
 }
 
 func NewSetting() Setting {
-	logrus.SetFormatter(&logrus.JSONFormatter{})
-
 	return Setting{
 		serviceName:                     "apigateway",
 		httpServerPort:                  mustAtoi(getEnv("HTTP_SERVER_PORT", "8080")),
 		env:                             getEnv("ENV", "development"),
+		gracefulShutdownTimeoutMs:       mustAtoi(getEnv("GRACEFUL_SHUTDOWN_TIMEOUT_MS", "5000")),
 		shouldProfile:                   mustAtob(getEnv("SHOULD_PROFILE", "false")),
 		shouldTrace:                     mustAtob(getEnv("SHOULD_TRACE", "false")),
 		shouldUseGRPCClientTLS:          mustAtob(getEnv("SHOULD_USE_GRPC_CLIENT_TLS", "false")),
@@ -42,7 +39,6 @@ func NewSetting() Setting {
 		userGRPCServiceURL:              getEnv("USER_GRPC_SERVICE_URL", "https://user-5hwa5dthla-an.a.run.app"),
 		isInGCP:                         mustAtob(getEnv("IS_IN_GCP", "false")),
 		idToken:                         getEnv("ID_TOKEN", "NOT_USED_IN_GCP"),
-		logger:                          logrus.StandardLogger(),
 	}
 }
 
