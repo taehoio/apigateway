@@ -31,13 +31,13 @@ func main() {
 func runServer(cfg config.Config) error {
 	log := cfg.Logger()
 
-	if cfg.ShouldProfile() {
-		if err := setUpProfiler(cfg.ServiceName()); err != nil {
+	if cfg.Setting().ShouldProfile {
+		if err := setUpProfiler(cfg.Setting().ServiceName); err != nil {
 			return err
 		}
 	}
 
-	if cfg.ShouldTrace() {
+	if cfg.Setting().ShouldTrace {
 		if err := setUpTracing(); err != nil {
 			return err
 		}
@@ -50,7 +50,7 @@ func runServer(cfg config.Config) error {
 	}
 
 	go func() {
-		log.WithField("port", cfg.HTTPServerPort()).Info("starting apigateway HTTP server")
+		log.WithField("port", cfg.Setting().HTTPServerPort).Info("starting apigateway HTTP server")
 		if err := httpServer.ListenAndServe(); err != nil {
 			log.Fatal(err)
 		}
@@ -62,7 +62,7 @@ func runServer(cfg config.Config) error {
 
 	<-quit
 
-	time.Sleep(time.Duration(cfg.GracefulShutdownTimeoutMs()) * time.Millisecond)
+	time.Sleep(time.Duration(cfg.Setting().GracefulShutdownTimeoutMs) * time.Millisecond)
 
 	log.Info("Stopping apigateway HTTP server")
 	if err := httpServer.Shutdown(ctx); err != nil {
