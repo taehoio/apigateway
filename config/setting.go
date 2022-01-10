@@ -22,7 +22,6 @@ type Setting struct {
 	AuthGRPCServiceEndpoint         string
 	AuthGRPCServiceURL              string
 	IsInGCP                         bool
-	IDToken                         string
 }
 
 func NewSetting() Setting {
@@ -42,7 +41,6 @@ func NewSetting() Setting {
 		AuthGRPCServiceEndpoint:         getEnv("AUTH_GRPC_SERVICE_ENDPOINT", "auth-5hwa5dthla-an.a.run.app:443"),
 		AuthGRPCServiceURL:              getEnv("AUTH_GRPC_SERVICE_URL", "https://auth-5hwa5dthla-an.a.run.app"),
 		IsInGCP:                         mustAtob(getEnv("IS_IN_GCP", "false")),
-		IDToken:                         getEnv("ID_TOKEN", "NOT_USED_IN_GCP"),
 	}
 }
 

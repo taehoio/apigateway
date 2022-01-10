@@ -55,9 +55,6 @@ func withMetadata(cfg config.Config, serviceNameURLMap map[string]string) runtim
 				logrus.StandardLogger().Error(err)
 			}
 			md.Append("Authorization", "Bearer "+idToken)
-		} else {
-			idToken := cfg.Setting().IDToken
-			md.Append("Authorization", "Bearer "+idToken)
 		}
 
 		return md
