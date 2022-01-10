@@ -5,9 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"contrib.go.opencensus.io/exporter/stackdriver/propagation"
 	"github.com/gorilla/mux"
-	"go.opencensus.io/plugin/ochttp"
+	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 
 	"github.com/taehoio/apigateway/config"
 )
@@ -27,13 +26,6 @@ func newRouter(ctx context.Context, cfg config.Config) (*mux.Router, error) {
 	return rtr, nil
 }
 
-func handlerWithTracingPropagation(httpMux *http.ServeMux) *ochttp.Handler {
-	return &ochttp.Handler{
-		Propagation: &propagation.HTTPFormat{},
-		Handler:     httpMux,
-	}
-}
-
 func NewHTTPServer(ctx context.Context, cfg config.Config) (*http.Server, error) {
 	rtr, err := newRouter(ctx, cfg)
 	if err != nil {
@@ -43,7 +35,7 @@ func NewHTTPServer(ctx context.Context, cfg config.Config) (*http.Server, error)
 	httpMux := http.NewServeMux()
 	httpMux.Handle("/", rtr)
 
-	httpHandler := handlerWithTracingPropagation(httpMux)
+	httpHandler := otelhttp.NewHandler(httpMux, "server")
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.Setting().HTTPServerPort),
