@@ -8,9 +8,13 @@ import (
 	"time"
 
 	"cloud.google.com/go/profiler"
-	"contrib.go.opencensus.io/exporter/stackdriver"
+	cloudtrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	"github.com/sirupsen/logrus"
-	"go.opencensus.io/trace"
+	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/propagation"
+	"go.opentelemetry.io/otel/sdk/resource"
+	"go.opentelemetry.io/otel/sdk/trace"
+	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 
 	"github.com/taehoio/apigateway/config"
 	"github.com/taehoio/apigateway/server"
@@ -38,9 +42,11 @@ func runServer(cfg config.Config) error {
 	}
 
 	if cfg.Setting().ShouldTrace {
-		if err := setUpTracing(); err != nil {
+		tp, err := setUpTracing(cfg.Setting().ServiceName)
+		if err != nil {
 			return err
 		}
+		defer tp.ForceFlush(context.Background())
 	}
 
 	ctx := context.Background()
@@ -50,7 +56,7 @@ func runServer(cfg config.Config) error {
 	}
 
 	go func() {
-		log.WithField("port", cfg.Setting().HTTPServerPort).Info("starting apigateway HTTP server")
+		log.WithField("port", cfg.Setting().HTTPServerPort).Info("Starting apigateway HTTP server")
 		if err := httpServer.ListenAndServe(); err != nil {
 			log.Fatal(err)
 		}
@@ -82,16 +88,27 @@ func setUpProfiler(serviceName string) error {
 	return nil
 }
 
-func setUpTracing() error {
-	exporter, err := stackdriver.NewExporter(stackdriver.Options{})
+func setUpTracing(serviceName string) (*trace.TracerProvider, error) {
+	exporter, err := cloudtrace.New()
 	if err != nil {
-		return err
+		return nil, nil
 	}
 
-	trace.RegisterExporter(exporter)
-	trace.ApplyConfig(trace.Config{
-		DefaultSampler: trace.AlwaysSample(),
-	})
+	tp := trace.NewTracerProvider(
+		trace.WithBatcher(exporter),
+		trace.WithResource(resource.NewWithAttributes(
+			semconv.SchemaURL,
+			semconv.ServiceNameKey.String(serviceName),
+		)),
+	)
+	otel.SetTracerProvider(tp)
 
-	return nil
+	otel.SetTextMapPropagator(
+		propagation.NewCompositeTextMapPropagator(
+			propagation.TraceContext{},
+			propagation.Baggage{},
+		),
+	)
+
+	return tp, nil
 }
