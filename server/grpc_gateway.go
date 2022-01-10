@@ -9,7 +9,7 @@ import (
 	googlemetadata "cloud.google.com/go/compute/metadata"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/sirupsen/logrus"
-	"go.opencensus.io/plugin/ocgrpc"
+	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials"
 	"google.golang.org/grpc/credentials/insecure"
@@ -74,10 +74,6 @@ func withSecureOption(cfg config.Config) (grpc.DialOption, error) {
 	}
 
 	return secureOpt, nil
-}
-
-func withTracingStatsHandler() grpc.DialOption {
-	return grpc.WithStatsHandler(&ocgrpc.ClientHandler{})
 }
 
 func registerBaemincryptoService(ctx context.Context, gwMux *runtime.ServeMux, endpoint string, opts ...grpc.DialOption) error {
@@ -162,7 +158,9 @@ func grpcGWMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error
 		gwMux,
 		cfg.Setting().BaemincryptoGRPCServiceEndpoint,
 		secureOpt,
-		withTracingStatsHandler(),
+		grpc.WithUnaryInterceptor(
+			otelgrpc.UnaryClientInterceptor(),
+		),
 	); err != nil {
 		return nil, err
 	}
@@ -172,7 +170,9 @@ func grpcGWMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error
 		gwMux,
 		cfg.Setting().UserGRPCServiceEndpoint,
 		secureOpt,
-		withTracingStatsHandler(),
+		grpc.WithUnaryInterceptor(
+			otelgrpc.UnaryClientInterceptor(),
+		),
 	); err != nil {
 		return nil, err
 	}
@@ -182,7 +182,9 @@ func grpcGWMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error
 		gwMux,
 		cfg.Setting().AuthGRPCServiceEndpoint,
 		secureOpt,
-		withTracingStatsHandler(),
+		grpc.WithUnaryInterceptor(
+			otelgrpc.UnaryClientInterceptor(),
+		),
 	); err != nil {
 		return nil, err
 	}
