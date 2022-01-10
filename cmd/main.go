@@ -56,7 +56,7 @@ func runServer(cfg config.Config) error {
 	}
 
 	go func() {
-		log.WithField("port", cfg.Setting().HTTPServerPort).Info("starting apigateway HTTP server")
+		log.WithField("port", cfg.Setting().HTTPServerPort).Info("Starting apigateway HTTP server")
 		if err := httpServer.ListenAndServe(); err != nil {
 			log.Fatal(err)
 		}
