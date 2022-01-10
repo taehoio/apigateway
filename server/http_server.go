@@ -35,7 +35,7 @@ func NewHTTPServer(ctx context.Context, cfg config.Config) (*http.Server, error)
 	httpMux := http.NewServeMux()
 	httpMux.Handle("/", rtr)
 
-	httpHandler := otelhttp.NewHandler(httpMux, "server")
+	httpHandler := otelhttp.NewHandler(httpMux, "apigateway-http-server")
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.Setting().HTTPServerPort),
