@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/profiler"
-	cloudtrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
+	texporter "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/propagation"
@@ -89,9 +89,9 @@ func setUpProfiler(serviceName string) error {
 }
 
 func setUpTracing(serviceName string) (*trace.TracerProvider, error) {
-	exporter, err := cloudtrace.New()
+	exporter, err := texporter.New()
 	if err != nil {
-		return nil, nil
+		return nil, err
 	}
 
 	tp := trace.NewTracerProvider(
