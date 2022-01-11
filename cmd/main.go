@@ -92,6 +92,7 @@ func setUpTracing(serviceName string) (*trace.TracerProvider, error) {
 	exporter, err := texporter.New()
 	if err != nil {
 		return nil, err
+	}
 
 	tp := trace.NewTracerProvider(
 		trace.WithBatcher(exporter),
