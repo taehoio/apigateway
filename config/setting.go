@@ -21,6 +21,8 @@ type Setting struct {
 	UserGRPCServiceURL              string
 	AuthGRPCServiceEndpoint         string
 	AuthGRPCServiceURL              string
+	OneononeGRPCServiceEndpoint     string
+	OneononeGRPCServiceURL          string
 	IsInGCP                         bool
 }
 
@@ -40,6 +42,8 @@ func NewSetting() Setting {
 		UserGRPCServiceURL:              getEnv("USER_GRPC_SERVICE_URL", "https://user-5hwa5dthla-an.a.run.app"),
 		AuthGRPCServiceEndpoint:         getEnv("AUTH_GRPC_SERVICE_ENDPOINT", "auth-5hwa5dthla-an.a.run.app:443"),
 		AuthGRPCServiceURL:              getEnv("AUTH_GRPC_SERVICE_URL", "https://auth-5hwa5dthla-an.a.run.app"),
+		OneononeGRPCServiceEndpoint:     getEnv("ONEONONE_GRPC_SERVICE_ENDPOINT", "oneonone-5hwa5dthla-an.a.run.app:443"),
+		OneononeGRPCServiceURL:          getEnv("ONEONONE_GRPC_SERVICE_URL", "https://oneonone-5hwa5dthla-an.a.run.app"),
 		IsInGCP:                         mustAtob(getEnv("IS_IN_GCP", "false")),
 	}
 }

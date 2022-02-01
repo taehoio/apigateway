@@ -19,6 +19,7 @@ import (
 	"github.com/taehoio/apigateway/config"
 	authv1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/auth/v1"
 	baemincryptov1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/baemincrypto/v1"
+	oneononev1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/oneonone/v1"
 	userv1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/user/v1"
 )
 
@@ -136,11 +137,32 @@ func registerAuthService(ctx context.Context, gwMux *runtime.ServeMux, endpoint 
 	return nil
 }
 
+func registerOneononeService(ctx context.Context, gwMux *runtime.ServeMux, endpoint string, opts ...grpc.DialOption) error {
+	oneononev1Conn, err := grpc.Dial(
+		endpoint,
+		opts...,
+	)
+	if err != nil {
+		return err
+	}
+
+	if err := oneononev1.RegisterOneononeServiceHandler(
+		ctx,
+		gwMux,
+		oneononev1Conn,
+	); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func grpcGWMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error) {
 	serviceNameURLMap := map[string]string{
 		"baemincrypto": cfg.Setting().BaemincryptoGRPCServiceURL,
 		"user":         cfg.Setting().UserGRPCServiceURL,
 		"auth":         cfg.Setting().AuthGRPCServiceURL,
+		"oneonone":     cfg.Setting().OneononeGRPCServiceURL,
 	}
 
 	gwMux := runtime.NewServeMux(
@@ -181,6 +203,18 @@ func grpcGWMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error
 		ctx,
 		gwMux,
 		cfg.Setting().AuthGRPCServiceEndpoint,
+		secureOpt,
+		grpc.WithUnaryInterceptor(
+			otelgrpc.UnaryClientInterceptor(),
+		),
+	); err != nil {
+		return nil, err
+	}
+
+	if err := registerOneononeService(
+		ctx,
+		gwMux,
+		cfg.Setting().OneononeGRPCServiceEndpoint,
 		secureOpt,
 		grpc.WithUnaryInterceptor(
 			otelgrpc.UnaryClientInterceptor(),
