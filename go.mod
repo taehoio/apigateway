@@ -8,7 +8,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.7.2
 	github.com/labstack/echo/v4 v4.6.1
 	github.com/sirupsen/logrus v1.8.1
-	github.com/taehoio/idl v0.0.0-20220109122601-3f390aa5c54e
+	github.com/taehoio/idl v0.0.0-20220201000256-978e17695a13
 	go.opentelemetry.io/otel v1.3.0
 	go.opentelemetry.io/otel/sdk v1.0.1
 	google.golang.org/grpc v1.43.0
