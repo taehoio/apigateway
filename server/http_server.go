@@ -26,6 +26,18 @@ func newRouter(ctx context.Context, cfg config.Config) (*mux.Router, error) {
 	return rtr, nil
 }
 
+func allowCORS(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", r.Header.Get("Origin"))
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, Authorization, ResponseType")
+		if r.Method == "OPTIONS" {
+			return
+		}
+		h.ServeHTTP(w, r)
+	})
+}
+
 func NewHTTPServer(ctx context.Context, cfg config.Config) (*http.Server, error) {
 	rtr, err := newRouter(ctx, cfg)
 	if err != nil {
@@ -36,6 +48,7 @@ func NewHTTPServer(ctx context.Context, cfg config.Config) (*http.Server, error)
 	httpMux.Handle("/", rtr)
 
 	httpHandler := otelhttp.NewHandler(httpMux, "apigateway-http-server")
+	httpHandler = allowCORS(httpHandler)
 
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.Setting().HTTPServerPort),
