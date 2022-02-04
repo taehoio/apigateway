@@ -255,6 +255,8 @@ github.com/stretchr/testify v1.7.0 h1:nwc3DEeHmmLAfoZucVR881uASk0Mfjw8xYJ99tb5Cc
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/taehoio/idl v0.0.0-20220202105737-36762fbeeea7 h1:3vAhr9f8V8sAHAH2y2PfjmLsN1G2Pu301ASt/vewY/I=
 github.com/taehoio/idl v0.0.0-20220202105737-36762fbeeea7/go.mod h1:bIB2TsURu08iiRq8GjSJmhP5WVWqIPzMXdLmAlDaj6Y=
+github.com/taehoio/idl v0.0.0-20220204080159-5b7ac9e08072 h1:603wZB2Fo1IqHgpVmLVcwOkJLKEkfXvBQOfHE0M1y/4=
+github.com/taehoio/idl v0.0.0-20220204080159-5b7ac9e08072/go.mod h1:bIB2TsURu08iiRq8GjSJmhP5WVWqIPzMXdLmAlDaj6Y=
 github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6KllzawFIhcdPw=
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
 github.com/valyala/fasttemplate v1.0.1/go.mod h1:UQGH1tvbgY+Nz5t2n7tXsz52dQxojPUpymEIMZ47gx8=
