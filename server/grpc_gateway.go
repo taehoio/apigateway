@@ -20,6 +20,7 @@ import (
 	authv1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/auth/v1"
 	baemincryptov1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/baemincrypto/v1"
 	oneononev1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/oneonone/v1"
+	texttospeechv1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/texttospeech/v1"
 	userv1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/user/v1"
 )
 
@@ -157,12 +158,33 @@ func registerOneononeService(ctx context.Context, gwMux *runtime.ServeMux, endpo
 	return nil
 }
 
+func registerTexttospeechService(ctx context.Context, gwMuc *runtime.ServeMux, endpoint string, opts ...grpc.DialOption) error {
+	texttospeechv1Conn, err := grpc.Dial(
+		endpoint,
+		opts...,
+	)
+	if err != nil {
+		return err
+	}
+
+	if err := texttospeechv1.RegisterTexttospeechServiceHandler(
+		ctx,
+		gwMuc,
+		texttospeechv1Conn,
+	); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func grpcGWMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error) {
 	serviceNameURLMap := map[string]string{
 		"baemincrypto": cfg.Setting().BaemincryptoGRPCServiceURL,
 		"user":         cfg.Setting().UserGRPCServiceURL,
 		"auth":         cfg.Setting().AuthGRPCServiceURL,
 		"oneonone":     cfg.Setting().OneononeGRPCServiceURL,
+		"texttospeech": cfg.Setting().TexttospeechGRPCServiceURL,
 	}
 
 	gwMux := runtime.NewServeMux(
@@ -215,6 +237,18 @@ func grpcGWMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error
 		ctx,
 		gwMux,
 		cfg.Setting().OneononeGRPCServiceEndpoint,
+		secureOpt,
+		grpc.WithUnaryInterceptor(
+			otelgrpc.UnaryClientInterceptor(),
+		),
+	); err != nil {
+		return nil, err
+	}
+
+	if err := registerTexttospeechService(
+		ctx,
+		gwMux,
+		cfg.Setting().TexttospeechGRPCServiceEndpoint,
 		secureOpt,
 		grpc.WithUnaryInterceptor(
 			otelgrpc.UnaryClientInterceptor(),
