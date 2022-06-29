@@ -46,7 +46,7 @@ func NewSetting() Setting {
 		AuthGRPCServiceURL:              getEnv("AUTH_GRPC_SERVICE_URL", "https://auth-5hwa5dthla-an.a.run.app"),
 		OneononeGRPCServiceEndpoint:     getEnv("ONEONONE_GRPC_SERVICE_ENDPOINT", "oneonone-5hwa5dthla-an.a.run.app:443"),
 		OneononeGRPCServiceURL:          getEnv("ONEONONE_GRPC_SERVICE_URL", "https://oneonone-5hwa5dthla-an.a.run.app"),
-		TexttospeechGRPCServiceEndpoint: getEnv("TEXTTOSPEECH_GRPC_SERVICE_ENDPOINT", "texttospeeche-5hwa5dthla-an.a.run.app:443"),
+		TexttospeechGRPCServiceEndpoint: getEnv("TEXTTOSPEECH_GRPC_SERVICE_ENDPOINT", "texttospeech-5hwa5dthla-an.a.run.app:443"),
 		TexttospeechGRPCServiceURL:      getEnv("TEXTTOSPEECH_GRPC_SERVICE_URL", "https://texttospeech-5hwa5dthla-an.a.run.app"),
 		IsInGCP:                         mustAtob(getEnv("IS_IN_GCP", "false")),
 	}
