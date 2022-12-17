@@ -16,13 +16,14 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/protobuf/encoding/protojson"
 
-	"github.com/taehoio/apigateway/config"
 	authv1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/auth/v1"
 	baemincryptov1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/baemincrypto/v1"
 	carv1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/car/v1"
 	oneononev1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/oneonone/v1"
 	texttospeechv1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/texttospeech/v1"
 	userv1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/user/v1"
+
+	"github.com/taehoio/apigateway/config"
 )
 
 func getIDTokenInGCP(serviceURL string) (string, error) {
