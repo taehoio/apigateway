@@ -25,6 +25,8 @@ type Setting struct {
 	OneononeGRPCServiceURL          string
 	TexttospeechGRPCServiceEndpoint string
 	TexttospeechGRPCServiceURL      string
+	CarGRPCServiceEndpoint          string
+	CarGRPCServiceURL               string
 	IsInGCP                         bool
 }
 
@@ -48,6 +50,8 @@ func NewSetting() Setting {
 		OneononeGRPCServiceURL:          getEnv("ONEONONE_GRPC_SERVICE_URL", "https://oneonone-5hwa5dthla-an.a.run.app"),
 		TexttospeechGRPCServiceEndpoint: getEnv("TEXTTOSPEECH_GRPC_SERVICE_ENDPOINT", "texttospeech-5hwa5dthla-an.a.run.app:443"),
 		TexttospeechGRPCServiceURL:      getEnv("TEXTTOSPEECH_GRPC_SERVICE_URL", "https://texttospeech-5hwa5dthla-an.a.run.app"),
+		CarGRPCServiceEndpoint:          getEnv("CAR_GRPC_SERVICE_ENDPOINT", "car-5hwa5dthla-an.a.run.app:443"),
+		CarGRPCServiceURL:               getEnv("CAR_GRPC_SERVICE_URL", "https://car-5hwa5dthla-an.a.run.app"),
 		IsInGCP:                         mustAtob(getEnv("IS_IN_GCP", "false")),
 	}
 }

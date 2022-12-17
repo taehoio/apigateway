@@ -19,6 +19,7 @@ import (
 	"github.com/taehoio/apigateway/config"
 	authv1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/auth/v1"
 	baemincryptov1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/baemincrypto/v1"
+	carv1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/car/v1"
 	oneononev1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/oneonone/v1"
 	texttospeechv1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/texttospeech/v1"
 	userv1 "github.com/taehoio/idl/gen/go/taehoio/idl/services/user/v1"
@@ -178,6 +179,26 @@ func registerTexttospeechService(ctx context.Context, gwMuc *runtime.ServeMux, e
 	return nil
 }
 
+func registerCarService(ctx context.Context, gwMuc *runtime.ServeMux, endpoint string, opts ...grpc.DialOption) error {
+	carv1Conn, err := grpc.Dial(
+		endpoint,
+		opts...,
+	)
+	if err != nil {
+		return err
+	}
+
+	if err := carv1.RegisterCarServiceHandler(
+		ctx,
+		gwMuc,
+		carv1Conn,
+	); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func grpcGWMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error) {
 	serviceNameURLMap := map[string]string{
 		"baemincrypto": cfg.Setting().BaemincryptoGRPCServiceURL,
@@ -185,6 +206,7 @@ func grpcGWMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error
 		"auth":         cfg.Setting().AuthGRPCServiceURL,
 		"oneonone":     cfg.Setting().OneononeGRPCServiceURL,
 		"texttospeech": cfg.Setting().TexttospeechGRPCServiceURL,
+		"car":          cfg.Setting().CarGRPCServiceURL,
 	}
 
 	gwMux := runtime.NewServeMux(
@@ -249,6 +271,18 @@ func grpcGWMux(ctx context.Context, cfg config.Config) (*runtime.ServeMux, error
 		ctx,
 		gwMux,
 		cfg.Setting().TexttospeechGRPCServiceEndpoint,
+		secureOpt,
+		grpc.WithUnaryInterceptor(
+			otelgrpc.UnaryClientInterceptor(),
+		),
+	); err != nil {
+		return nil, err
+	}
+
+	if err := registerCarService(
+		ctx,
+		gwMux,
+		cfg.Setting().CarGRPCServiceEndpoint,
 		secureOpt,
 		grpc.WithUnaryInterceptor(
 			otelgrpc.UnaryClientInterceptor(),
