@@ -1,6 +1,12 @@
 GOPATH:=$(shell go env GOPATH)
 APP?=apigateway
 
+.PHONY: install-tools
+## install-tools: installs dependencies for tools
+install-tools:
+	@echo Installing tools from tools.go
+	@cat tools.go | grep _ | awk -F'"' '{print $$2}' | xargs -tI % go install %
+
 .PHONY: build
 ## build: build the application(api)
 build:
@@ -13,40 +19,56 @@ build:
 run:
 	go run -v -race cmd/main.go
 
-.PHONY: format
-## format: format files
-format:
-	@go install golang.org/x/tools/cmd/goimports@latest
-	goimports -local github.com/taehoio -w .
-	gofmt -s -w .
+.PHONY: format-go
+## format-go: formats go files
+format-go: install-tools
+	find . -not -path './gen/*' -not -path './tools.go' -not -name '*_mock.go' -name '*.go' -print0 | xargs -0 -I {} goimports-reviser -rm-unused -format -company-prefixes github.com/taehoio {}
 	go mod tidy
 
+.PHONY: format
+## format: formats files
+format: format-go
+
 .PHONY: test
-## test: run tests
-test:
-	@go install github.com/rakyll/gotest@latest
+## test: runs tests
+test: install-tools
 	gotest -p 1 -race -cover -v ./...
 
 .PHONY: coverage
-## coverage: run tests with coverage
-coverage:
-	@go install github.com/rakyll/gotest@latest
+## coverage: runs tests with coverage
+coverage: install-tools
 	gotest -p 1 -race -coverprofile=coverage.out -covermode=atomic -v ./...
 
-.PHONY: lint
-## lint: check everything's okay
-lint:
-	@go install github.com/kyoh86/scopelint@latest
-	golangci-lint run ./...
-	scopelint --set-exit-status ./...
-	go mod verify
+.PHONY: generate-mock
+## generate-mock: generates mock files
+generate-mock: install-tools
+	go generate ./...
 
 .PHONY: generate
-## generate: generate source code for mocking
-generate:
-	@go install golang.org/x/tools/cmd/stringer@latest
-	@go install github.com/golang/mock/mockgen@1.6.0
-	go generate ./...
+## generate: generates files
+generate: generate-mock
+
+.PHONY: lint-go
+## lint-go: lints go files
+lint-go: install-tools
+	golangci-lint run ./...
+	find . -not -path './gen/*' -not -path './tools.go' -not -name '*_mock.go' -name '*.go' -print0 | xargs -0 -I {} goimports-reviser -rm-unused -format -company-prefixes github.com/taehoio -list-diff -set-exit-status {}
+	go mod verify
+
+.PHONY: lint
+## lint: lints files
+lint: lint-go
+
+.PHONY: clean
+## clean: cleans generated files
+clean:
+	rm -rf gen
+
+.PHONY: diff
+## diff: shows diff
+diff:
+	git diff --exit-code
+	if [ -n "$(git status --porcelain)" ]; then git status; exit 1; else exit 0; fi
 
 .PHONY: help
 ## help: prints this help message
